@@ -8,5 +8,8 @@ namespace BuyBuyBuy.Api.C
     public class UserLevelService
     {
         public int GetRoleById()
+        {
+            return 0;
+        }
     }
 }

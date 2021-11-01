@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,8 @@ namespace BuyBuyBuy.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddSingleton(ConnectionMultiplexer.Connect("192.168.50.200"));
+            services.AddScoped(service => service.GetRequiredService<ConnectionMultiplexer>().GetDatabase());
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using BuyBuyBuy.Api.Model;
+using BuyBuyBuy.Api.Service;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,15 +13,9 @@ namespace BuyBuyBuy.Api.Controllers
     public class Oauth2Controller : ControllerBase
     {
         private readonly OpenIdService openIdService;
-        private readonly IMemoryCache memoryCache;
-        private readonly ZentaoClient zentaoClient;
-        private readonly MemoryCacheCancellationTokenSource cacheToken;
-        public Oauth2Controller(OpenIdService openIdService, IMemoryCache memoryCache, ZentaoClient zentaoClient, MemoryCacheCancellationTokenSource cacheToken)
+        public Oauth2Controller(OpenIdService openIdService)
         {
             this.openIdService = openIdService;
-            this.memoryCache = memoryCache;
-            this.zentaoClient = zentaoClient;
-            this.cacheToken = cacheToken;
         }
         [HttpPost]
         public async Task<IActionResult> CallBack([FromForm] OpenIdCallback callback)

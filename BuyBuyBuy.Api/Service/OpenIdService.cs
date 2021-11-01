@@ -17,7 +17,6 @@ namespace BuyBuyBuy.Api.Service
     {
         private readonly HttpClient httpClient;
         private readonly IDiscoveryCache discovery;
-        private readonly 
         private readonly IOptionsMonitor<OpenIdConfig> config;
         private readonly IOptionsMonitor<JwtConfig> jwtConfig;
         public OpenIdService(IHttpClientFactory httpClientFactory, IDiscoveryCache discovery,
