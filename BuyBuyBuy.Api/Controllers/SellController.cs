@@ -1,6 +1,9 @@
-﻿using BuyBuyBuy.Api.Model;
+﻿using BuyBuyBuy.Api.Constance;
+using BuyBuyBuy.Api.Model;
 using BuyBuyBuy.Api.Service;
+using BuyBuyBuy.Api.Tools;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
 
 namespace BuyBuyBuy.Api.Controllers
@@ -16,20 +19,20 @@ namespace BuyBuyBuy.Api.Controllers
             this.itemService = itemService;
             this.activityService = activityService;
         }
+
+        [HttpPost]
         public async ValueTask<IActionResult> BuyItem([FromBody] BuyItemModel model)
         {
             if (!await activityService.CheckActivityIsActive(model.ActivityId))
             {
                 return BadRequest("该抢购不存在或者不在抢购时间内");
             }
-            if (await itemService.BuyOneItem(model.ItemId))
+            if (model.Quantity == 0)
             {
-                return Ok("抢购成功");
+                model.Quantity = 1;
             }
-            else
-            {
-                return Ok("抢购失败");
-            }
+            var result = await itemService.BuyOneItem(model);
+            return Ok(result.GetEnumDescription());
         }
     }
 }

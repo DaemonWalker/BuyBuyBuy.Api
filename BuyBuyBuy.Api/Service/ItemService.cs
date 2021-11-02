@@ -1,5 +1,11 @@
-﻿using BuyBuyBuy.Api.Contract;
+﻿using BuyBuyBuy.Api.Constance;
+using BuyBuyBuy.Api.Contract;
 using BuyBuyBuy.Api.Contract.Data;
+using BuyBuyBuy.Api.Entity;
+using BuyBuyBuy.Api.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BuyBuyBuy.Api.Service
@@ -7,25 +13,57 @@ namespace BuyBuyBuy.Api.Service
     public class ItemService
     {
         private readonly ICache cache;
-        private readonly IStore store;
-        public ItemService(ICache cache, IStore store)
+
+        private readonly IActionItemRepository actionItem;
+
+        private readonly IActivityHistory activityHistory;
+
+        public ItemService(ICache cache, IActionItemRepository actionItem, IActivityHistory activityHistory)
         {
             this.cache = cache;
-            this.store = store;
+            this.activityHistory = activityHistory;
+            this.actionItem = actionItem;
         }
 
-        public async Task<bool> BuyOneItem(string itemId)
+        public async Task<BuyItemResult> BuyOneItem(BuyItemModel buy)
         {
-            var item = await store.GetItemByIdAsync(itemId);
-            var idx = await cache.BuyOneItemAsync(itemId);
-            if (idx < item.MaxCount)
+            BuyItemResult result = BuyItemResult.OK;
+            long buyCount = await cache.AddUserBuyAsync(buy);
+            ActivityItem item = await actionItem.GetOneItemInActivityAsync(buy.ActivityId, buy.ItemId);
+            if (buyCount > item.UserLimit)
             {
-                return true;
+                if (buyCount - buy.Quantity >= item.UserLimit)
+                {
+                    return BuyItemResult.Buyed;
+                }
+                else
+                {
+                    result = BuyItemResult.OverLimit;
+                    buy.Quantity = item.UserLimit - (buyCount - buy.Quantity);
+                }
             }
-            else
+            long inventory = await cache.BuyItemAsync(buy);
+            if (inventory < 0)
             {
-                return false;
+                if (inventory + buy.Quantity <= 0)
+                {
+                    return BuyItemResult.SoldOut;
+                }
+                else
+                {
+                    buy.Quantity = inventory + buy.Quantity;
+                    result = BuyItemResult.NotEnough;
+                }
             }
+
+            await activityHistory.AddUserBuyAsync(UserBuyHistory.Create(buy));
+            return result;
+        }
+
+        public async Task<List<ItemModel>> GetItemsByActivity(int actId)
+        {
+            return (await actionItem.GetActivityItemsAsync(actId)).Cast<ItemModel>().ToList();
         }
     }
+
 }

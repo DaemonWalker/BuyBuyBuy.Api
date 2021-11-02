@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace BuyBuyBuy.Api.Entity
 {
@@ -8,5 +9,6 @@ namespace BuyBuyBuy.Api.Entity
         public string Name { get; set; }
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
+        public List<ActivityItem> Items { get; set; }
     }
 }

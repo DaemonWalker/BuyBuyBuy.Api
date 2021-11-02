@@ -8,6 +8,5 @@ namespace BuyBuyBuy.Api.Contract.Data
     {
         Task<Item> GetItemByIdAsync(string itemId);
         Task<List<Item>> GetAllItems();
-        Task<Activity> GetActivityByIdAsync(int Id);
-    }
+        Task<Activity> GetActivityByIdAsync(int Id);    }
 }

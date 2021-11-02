@@ -1,5 +1,9 @@
-﻿using BuyBuyBuy.Api.Contract;
+﻿using BuyBuyBuy.Api.Contract.Data;
+using BuyBuyBuy.Api.Entity;
+using BuyBuyBuy.Api.Model;
 using StackExchange.Redis;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BuyBuyBuy.Api.Data
@@ -11,14 +15,25 @@ namespace BuyBuyBuy.Api.Data
         {
             this.redis = redis;
         }
-        public long BuyOneItem(string itemId)
+
+        public Task<long> AddUserBuyAsync(BuyItemModel buy)
         {
-            return redis.StringIncrement(itemId);
+            return redis.HashIncrementAsync(BuildUserBoughtKey(buy), buy.UserId, buy.Quantity);
         }
 
-        public Task<long> BuyOneItemAsync(string itemId)
+        public Task<long> BuyItemAsync(BuyItemModel buy)
         {
-            return redis.StringIncrementAsync(itemId);
+            return redis.HashDecrementAsync(BuildActivityInventoryKey(buy.ActivityId), buy.ItemId, buy.Quantity);
         }
+
+        public Task SetActivityInventory(List<ActivityItem> items)
+        {
+            var activityId = items.First().ActivityId;
+            var entries = items.Select(p => new HashEntry(p.ItemId, p.TotalInventory)).ToArray();
+            return redis.HashSetAsync(BuildActivityInventoryKey(activityId), entries);
+        }
+
+        private string BuildUserBoughtKey(BuyItemModel buy) => $"hash_bought_{buy.UserId}_{buy.ActivityId}";
+        private string BuildActivityInventoryKey(int activityId) => $"hash_inventory_{activityId}";
     }
 }

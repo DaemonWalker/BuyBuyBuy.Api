@@ -20,27 +20,15 @@ namespace BuyBuyBuy.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CallBack([FromForm] OpenIdCallback callback)
         {
-            var user = await openIdService.CreateZentaoUser(callback);
-            if (await zentaoClient.IsUserExists(user.Account) == false)
+            var userInfo = await openIdService.CreateJwt(callback);
+            if (userInfo == default)
             {
-                if (memoryCache.TryGetValue(user.Account, out var _) == false)
-                {
-                    var options = new MemoryCacheEntryOptions().AddExpirationToken(new CancellationChangeToken(cacheToken.Token));
-
-                    memoryCache.Set(user.Account, user.Account, options);
-                    await zentaoClient.CreateUser(user);
-                }
-                else
-                {
-                    return BadRequest("账号初始化中，请刷新网页");
-                }
+                return BadRequest("登陆失败");
             }
             else
             {
-                memoryCache.Remove(user.Account);
+                return Ok(userInfo);
             }
-
-            return Redirect(zentaoClient.GetLoginUrl(user.Account));
         }
 
         [HttpPost]

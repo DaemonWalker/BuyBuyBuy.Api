@@ -2,11 +2,12 @@
 {
     public class Item
     {
-        public int Id { get; set; }
-        public string ItemId { get; set; }
+        public string Id { get; set; }
         public string Name { get; set; }
-        public double Price { get; set; }
-        public int MaxCount { get; set; }
         public string Url { get; set; }
+        public static Item Create(string itemId, string name, string url)
+        {
+            return new Item() { Id = itemId, Name = name, Url = url };
+        }
     }
 }

@@ -1,10 +1,14 @@
-﻿using System.Threading.Tasks;
+﻿using BuyBuyBuy.Api.Entity;
+using BuyBuyBuy.Api.Model;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace BuyBuyBuy.Api.Contract
+namespace BuyBuyBuy.Api.Contract.Data
 {
     public interface ICache
     {
-        Task<long> BuyOneItemAsync(string itemId);
-        long BuyOneItem(string itemId);
+        Task<long> AddUserBuyAsync(BuyItemModel buy);
+        Task<long> BuyItemAsync(BuyItemModel buy);
+        Task SetActivityInventory(List<ActivityItem> items);
     }
 }
