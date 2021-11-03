@@ -1,6 +1,7 @@
 ﻿using BuyBuyBuy.Api.Contract.Data;
 using BuyBuyBuy.Api.Model;
 using BuyBuyBuy.Api.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace BuyBuyBuy.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]/[action]")]
     public class ActivityController : ControllerBase

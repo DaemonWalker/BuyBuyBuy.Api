@@ -66,7 +66,6 @@ namespace BuyBuyBuy.Api.Service
             var user = new UserModel()
             {
                 Id = userInfo.Claims.First(p => p.Type == "sub").Value.ToString(),
-                EMail = userInfo.Claims.First(p => p.Type == "email").Value.ToString(),
                 Name = userInfo.Claims.First(p => p.Type == "name").Value.ToString(),
                 Level = 1,
             };
@@ -75,14 +74,14 @@ namespace BuyBuyBuy.Api.Service
             return user;
         }
 
-        private string GenerateJWT(UserModel user)
+        public string GenerateJWT(UserModel user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(jwtConfig.CurrentValue.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Sid, user.Id) }),
-                Expires = DateTime.UtcNow.AddMinutes(30),
+                Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Sid, user.Id), new Claim(ClaimTypes.Role, user.Level.ToString()) }),
+                Expires = DateTime.Now.AddMinutes(30),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
                 Issuer = jwtConfig.CurrentValue.Issuer,
                 Audience = jwtConfig.CurrentValue.Audience,

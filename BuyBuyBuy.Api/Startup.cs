@@ -1,8 +1,11 @@
 using BuyBuyBuy.Api.Contract.Data;
 using BuyBuyBuy.Api.Data;
+using BuyBuyBuy.Api.Middleware;
 using BuyBuyBuy.Api.Model;
 using BuyBuyBuy.Api.Service;
 using BuyBuyBuy.Api.Tools;
+using IdentityModel.Client;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -11,11 +14,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace BuyBuyBuy.Api
@@ -33,6 +40,7 @@ namespace BuyBuyBuy.Api
         public void ConfigureServices(IServiceCollection services)
         {
             var redisConfig = this.Configuration.GetSection("redis").Get<RedisConfig>().ToConfigOptions();
+            services.Configure<OpenIdConfig>(this.Configuration.GetSection("openId"));
 
             services.AddSingleton(ConnectionMultiplexer.Connect(redisConfig));
             services.AddScoped(service => service.GetRequiredService<ConnectionMultiplexer>().GetDatabase());
@@ -47,8 +55,45 @@ namespace BuyBuyBuy.Api
                 .AddScoped<ICache, Cache>()
                 .AddSingleton<IStore, StaticStore>()
                 .AddSingleton<CurrentTimeAccessor>()
+                .AddScoped<OpenIdService>()
                 .AddScoped<IActivityHistory, RedisActivityHistory>()
-                .AddScoped<IActionItemRepository, StaticStore>();
+                .AddScoped<IActionItemRepository, StaticStore>()
+                .AddSingleton<IRequestCache, MemoryRequestCache>();
+
+            services.AddHttpClient();
+            services.AddSingleton<IDiscoveryCache>(services =>
+            {
+                var factory = services.GetRequiredService<IHttpClientFactory>();
+                var config = services.GetRequiredService<IOptionsMonitor<OpenIdConfig>>().CurrentValue;
+                return new DiscoveryCache(config.ServerUrl, () => factory.CreateClient(),
+                    new DiscoveryPolicy() { RequireHttps = false });
+            });
+
+            var jwtConfig = this.Configuration.GetSection("jwt");
+            services.Configure<JwtConfig>(jwtConfig);
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+            }).AddJwtBearer(x =>
+            {
+                var token = jwtConfig.Get<JwtConfig>();
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(token.Secret)),
+                    ValidIssuer = token.Issuer,
+                    ValidAudience = token.Audience,
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.FromSeconds(0),
+                    ValidateLifetime = true
+                };
+            });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -60,9 +105,10 @@ namespace BuyBuyBuy.Api
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "BuyBuyBuy.Api v1"));
             }
-
+            app.UseMiddleware<LimitRequestMiddleware>();
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

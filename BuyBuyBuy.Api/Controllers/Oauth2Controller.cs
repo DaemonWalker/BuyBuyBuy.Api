@@ -37,5 +37,10 @@ namespace BuyBuyBuy.Api.Controllers
             var url = await openIdService.GetAuthorizeUrl(redirectUrl);
             return Redirect(url);
         }
+        [HttpPost]
+        public IActionResult CreateToken()
+        {
+            return Ok(openIdService.GenerateJWT(new UserModel() { Id = "155775", EMail = "dhc-ce.ji@dhc.com.cn", Level = 2 }));
+        }
     }
 }
