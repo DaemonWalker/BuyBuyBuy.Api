@@ -38,9 +38,9 @@ namespace BuyBuyBuy.Api.Controllers
             return Redirect(url);
         }
         [HttpPost]
-        public IActionResult CreateToken()
+        public IActionResult CreateToken([FromBody] string userId = "155775")
         {
-            return Ok(openIdService.GenerateJWT(new UserModel() { Id = "155775", EMail = "dhc-ce.ji@dhc.com.cn", Level = 2 }));
+            return Ok(openIdService.GenerateJWT(new UserModel() { Id = userId, EMail = "dhc-ce.ji@dhc.com.cn", Level = 2 }));
         }
     }
 }

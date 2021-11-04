@@ -25,6 +25,7 @@ namespace BuyBuyBuy.Api.Controllers
         [HttpPost]
         public async ValueTask<IActionResult> BuyItem([FromBody] BuyItemModel model)
         {
+            model.UserId = this.GetUserId();
             if (!await activityService.CheckActivityIsActive(model.ActivityId))
             {
                 return BadRequest("该抢购不存在或者不在抢购时间内");

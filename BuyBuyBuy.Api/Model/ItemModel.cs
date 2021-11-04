@@ -12,8 +12,24 @@ namespace BuyBuyBuy.Api.Model
         public string Name { get; set; }
         public string Url { get; set; }
         public double Price { get; set; }
-        public int MaxCount { get; set; }
-        public static implicit operator ItemModel(ActivityItem item)
+        public int TotalInventory { get; set; }
+        public int UserLimit { get; set; }
+        //public static implicit operator ItemModel(Item item)
+        //{
+        //    if (item == default)
+        //    {
+        //        return default;
+        //    }
+        //    return new ItemModel()
+        //    {
+        //        Name = item.Name,
+        //        ItemId = item.Id,
+        //        TotalInventory = item.TotalInventory,
+        //        Price = item.Price,
+        //        Url = item.Url,
+        //    };
+        //}
+        public static implicit operator ItemModel(Item item)
         {
             if (item == default)
             {
@@ -21,11 +37,12 @@ namespace BuyBuyBuy.Api.Model
             }
             return new ItemModel()
             {
-                Name = item.Item.Name,
-                ItemId = item.ItemId,
-                MaxCount = item.TotalInventory,
+                ItemId = item.Id,
+                TotalInventory = item.TotalInventory,
                 Price = item.Price,
-                Url = item.Item.Url,
+                Name = item.Name,
+                Url = item.Url,
+                UserLimit = item.UserLimit,
             };
         }
     }

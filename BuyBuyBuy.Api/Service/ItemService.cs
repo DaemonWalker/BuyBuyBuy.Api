@@ -13,23 +13,22 @@ namespace BuyBuyBuy.Api.Service
     public class ItemService
     {
         private readonly ICache cache;
+        private readonly IItemRepository itemRepository;
 
-        private readonly IActionItemRepository actionItem;
+        private readonly IActivityBoughtRepository activityHistory;
 
-        private readonly IActivityHistory activityHistory;
-
-        public ItemService(ICache cache, IActionItemRepository actionItem, IActivityHistory activityHistory)
+        public ItemService(ICache cache, IItemRepository itemRepository, IActivityBoughtRepository activityHistory)
         {
             this.cache = cache;
             this.activityHistory = activityHistory;
-            this.actionItem = actionItem;
+            this.itemRepository = itemRepository;
         }
 
         public async Task<BuyItemResult> BuyOneItem(BuyItemModel buy)
         {
             BuyItemResult result = BuyItemResult.OK;
             long buyCount = await cache.AddUserBuyAsync(buy);
-            ActivityItem item = await actionItem.GetOneItemInActivityAsync(buy.ActivityId, buy.ItemId);
+            var item = await itemRepository.GetItemByIdAsync(buy.ItemId);
             if (buyCount > item.UserLimit)
             {
                 if (buyCount - buy.Quantity >= item.UserLimit)
@@ -62,7 +61,7 @@ namespace BuyBuyBuy.Api.Service
 
         public async Task<List<ItemModel>> GetItemsByActivity(int actId)
         {
-            return (await actionItem.GetActivityItemsAsync(actId)).Cast<ItemModel>().ToList();
+            return (await itemRepository.GetActivityItemsAsync(actId)).Cast<ItemModel>().ToList();
         }
     }
 

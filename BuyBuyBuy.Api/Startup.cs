@@ -4,6 +4,7 @@ using BuyBuyBuy.Api.Middleware;
 using BuyBuyBuy.Api.Model;
 using BuyBuyBuy.Api.Service;
 using BuyBuyBuy.Api.Tools;
+using FreeSql.Internal;
 using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -39,6 +40,13 @@ namespace BuyBuyBuy.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var mysqlConf = this.Configuration.GetSection("mysql").Get<MySQLConfig>();
+            var fsql = new FreeSql.FreeSqlBuilder()
+               .UseConnectionString(FreeSql.DataType.MySql, mysqlConf.ConnectionString)
+               .UseNameConvert(NameConvertType.ToLower)
+               .UseAutoSyncStructure(true)
+               .Build();
+
             var redisConfig = this.Configuration.GetSection("redis").Get<RedisConfig>().ToConfigOptions();
             services.Configure<OpenIdConfig>(this.Configuration.GetSection("openId"));
 
@@ -53,12 +61,15 @@ namespace BuyBuyBuy.Api
             services.AddScoped<ItemService>()
                 .AddScoped<ActivityService>()
                 .AddScoped<ICache, Cache>()
-                .AddSingleton<IStore, StaticStore>()
+                .AddSingleton<IActivityRepository, MySQLStore>()
                 .AddSingleton<CurrentTimeAccessor>()
                 .AddScoped<OpenIdService>()
-                .AddScoped<IActivityHistory, RedisActivityHistory>()
-                .AddScoped<IActionItemRepository, StaticStore>()
-                .AddSingleton<IRequestCache, MemoryRequestCache>();
+                .AddScoped<IActivityBoughtRepository, RedisActivityBoughtRepository>()
+                .AddSingleton<IItemRepository, MySQLStore>()
+                .AddSingleton<IRequestCache, MemoryRequestCache>()
+                .AddScoped<BoughtService>()
+                .AddScoped<IActivityBoughtRepository, RedisActivityBoughtRepository>()
+                .AddSingleton(fsql);
 
             services.AddHttpClient();
             services.AddSingleton<IDiscoveryCache>(services =>

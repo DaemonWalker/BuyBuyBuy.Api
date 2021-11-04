@@ -8,21 +8,21 @@ namespace BuyBuyBuy.Api.Service
 {
     public class ActivityService
     {
-        private readonly IStore store;
-        private readonly IActionItemRepository actionItem;
+        private readonly IActivityRepository activityRepository;
+        private readonly IItemRepository itemRepository;
         private readonly CurrentTimeAccessor currentTimeAccessor;
         private readonly ICache cache;
-        public ActivityService(IStore store, IActionItemRepository actionItem, ICache cache,
+        public ActivityService(IActivityRepository store, IItemRepository itemRepository, ICache cache,
             CurrentTimeAccessor currentTimeAccessor)
         {
-            this.store = store;
-            this.actionItem = actionItem;
+            this.activityRepository = store;
+            this.itemRepository = itemRepository;
             this.currentTimeAccessor = currentTimeAccessor;
             this.cache = cache;
         }
         public async ValueTask<bool> CheckActivityIsActive(int actId)
         {
-            var activity = await store.GetActivityByIdAsync(actId);
+            var activity = await activityRepository.GetActivityByIdAsync(actId);
             if (activity == default)
             {
                 return false;
@@ -32,11 +32,11 @@ namespace BuyBuyBuy.Api.Service
         }
         public async ValueTask<ActivityModel> GetActivity(int actId)
         {
-            return await store.GetActivityByIdAsync(actId);
+            return await activityRepository.GetActivityByIdAsync(actId);
         }
         public async ValueTask InitInventory(int actId)
         {
-            var list = await actionItem.GetActivityItemsAsync(actId);
+            var list = await this.itemRepository.GetActivityItemsAsync(actId);
             await cache.SetActivityInventory(list);
         }
     }
