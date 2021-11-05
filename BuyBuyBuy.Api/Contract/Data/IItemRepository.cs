@@ -6,7 +6,5 @@ namespace BuyBuyBuy.Api.Contract.Data
 {
     public interface IItemRepository
     {
-        ValueTask<Item> GetItemByIdAsync(string itemId);
-        ValueTask<List<Item>> GetActivityItemsAsync(int actId);
     }
 }

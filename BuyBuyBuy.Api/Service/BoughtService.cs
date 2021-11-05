@@ -1,6 +1,7 @@
 ﻿using BuyBuyBuy.Api.Contract.Data;
 using BuyBuyBuy.Api.Entity;
 using BuyBuyBuy.Api.Model;
+using BuyBuyBuy.Api.Tools;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,13 +12,13 @@ namespace BuyBuyBuy.Api.Service
     {
         private readonly IActivityBoughtRepository activityHistoryRepo;
         private readonly IActivityRepository activityRepo;
-        private readonly IItemRepository itemRepository;
+        private readonly IActivityItemRepository activityItemRepository;
         public BoughtService(IActivityBoughtRepository activityHistory, IActivityRepository activity,
-            IItemRepository itemRepository)
+            IActivityItemRepository activityItemRepository)
         {
             this.activityHistoryRepo = activityHistory;
             this.activityRepo = activity;
-            this.itemRepository = itemRepository;
+            this.activityItemRepository = activityItemRepository;
         }
         public async ValueTask<List<UserBoughtModel>> GetActivityBought(int actId)
         {
@@ -33,17 +34,22 @@ namespace BuyBuyBuy.Api.Service
         public async ValueTask<List<UserBoughtModel>> GetActivityUserBought(int actId, string userId)
         {
             var boughtHistory = await activityHistoryRepo.GetActivityUserBought(actId, userId);
-            var itemList = await itemRepository.GetActivityItemsAsync(actId);
+            var itemList = await activityItemRepository.GetItemsAsync(actId);
             var activity = await activityRepo.GetActivityByIdAsync(actId);
             var result = new List<UserBoughtModel>();
 
             foreach (var history in boughtHistory)
             {
-                var itemEntity = itemList.First(p => p.Id == history.ItemId);
                 var item = new UserBoughtModel();
-                item.Item = itemEntity;
+                item.Item = new ItemModel()
+                {
+                    Name = history.ItemName,
+                    Price = history.Price,
+                    Url = history.Url,
+                };
                 item.Quantity = history.Quantity;
                 item.Activity = activity;
+                item.Time = history.BoughtTime.ToDisplayString();
                 result.Add(item);
             }
 

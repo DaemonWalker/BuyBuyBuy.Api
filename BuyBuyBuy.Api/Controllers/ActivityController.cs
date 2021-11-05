@@ -23,18 +23,25 @@ namespace BuyBuyBuy.Api.Controllers
             this.activityService = activityService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllItems([FromQuery] int actId)
+        [HttpPost]
+        public async Task<IActionResult> GetAllItems([FromBody] int actId)
         {
             var list = await itemService.GetItemsByActivity(actId);
             return Ok(list);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> InitInventory([FromBody] int actId)
+        [HttpGet]
+        public async ValueTask<IActionResult> GetCurrentActivity()
         {
-            await activityService.InitInventory(actId);
-            return Ok("初始化完成");
+            ActivityModel act = await activityService.GetNextActivityAsync();
+            return Ok(act);
         }
+
+        public async ValueTask<IActionResult> GetAllActivities()
+        {
+            var acts = await activityService.GetAllActivities();
+            return Ok(acts);
+        }
+
     }
 }

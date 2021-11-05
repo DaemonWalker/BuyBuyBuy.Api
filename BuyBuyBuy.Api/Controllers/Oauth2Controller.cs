@@ -1,5 +1,6 @@
 ﻿using BuyBuyBuy.Api.Model;
 using BuyBuyBuy.Api.Service;
+using BuyBuyBuy.Api.Tools;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace BuyBuyBuy.Api.Controllers
             this.openIdService = openIdService;
         }
         [HttpPost]
-        public async Task<IActionResult> CallBack([FromForm] OpenIdCallback callback)
+        public async Task<IActionResult> CallBack([FromBody] OpenIdCallback callback)
         {
             var userInfo = await openIdService.CreateJwt(callback);
             if (userInfo == default)
@@ -40,7 +41,7 @@ namespace BuyBuyBuy.Api.Controllers
         [HttpPost]
         public IActionResult CreateToken([FromBody] string userId = "155775")
         {
-            return Ok(openIdService.GenerateJWT(new UserModel() { Id = userId, EMail = "dhc-ce.ji@dhc.com.cn", Level = 2 }));
+            return Ok(openIdService.GenerateJWT(new UserModel() { Id = userId, EMail = "dhc-ce.ji@dhc.com.cn", Role = 2.ToRole() }));
         }
     }
 }

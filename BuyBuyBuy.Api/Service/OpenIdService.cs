@@ -1,4 +1,7 @@
-﻿using BuyBuyBuy.Api.Model;
+﻿using BuyBuyBuy.Api.Contract.Data;
+using BuyBuyBuy.Api.Entity;
+using BuyBuyBuy.Api.Model;
+using BuyBuyBuy.Api.Tools;
 using IdentityModel.Client;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -19,13 +22,15 @@ namespace BuyBuyBuy.Api.Service
         private readonly IDiscoveryCache discovery;
         private readonly IOptionsMonitor<OpenIdConfig> config;
         private readonly IOptionsMonitor<JwtConfig> jwtConfig;
-        public OpenIdService(IHttpClientFactory httpClientFactory, IDiscoveryCache discovery,
+        private readonly IUserRepository userRepository;
+        public OpenIdService(IHttpClientFactory httpClientFactory, IDiscoveryCache discovery, IUserRepository userRepository,
             IOptionsMonitor<OpenIdConfig> config, IOptionsMonitor<JwtConfig> jwtConfig)
         {
             this.httpClient = httpClientFactory.CreateClient("OpenId");
             this.discovery = discovery;
             this.config = config;
             this.jwtConfig = jwtConfig;
+            this.userRepository = userRepository;
         }
 
         public async ValueTask<string> GetAuthorizeUrl(string redirectUrl = null)
@@ -59,18 +64,16 @@ namespace BuyBuyBuy.Api.Service
                 Address = disco.UserInfoEndpoint,
                 ClientId = this.config.CurrentValue.ClientId,
                 ClientSecret = this.config.CurrentValue.ClientSecret,
-
                 Token = res.AccessToken,
             });
-
-            var user = new UserModel()
+            var userId = userInfo.Claims.First(p => p.Type == "sub").Value.ToString();
+            UserModel user = await userRepository.GetByIdAsync(userId);
+            if (user == null)
             {
-                Id = userInfo.Claims.First(p => p.Type == "sub").Value.ToString(),
-                Name = userInfo.Claims.First(p => p.Type == "name").Value.ToString(),
-                Level = 1,
-            };
+                var name = userInfo.Claims.First(p => p.Type == "name").Value.ToString();
+                user = await userRepository.CreateOrUpdateUser(new User() { Id = userId, Level = 1, Name = name });
+            }
             user.Token = GenerateJWT(user);
-
             return user;
         }
 
@@ -80,7 +83,7 @@ namespace BuyBuyBuy.Api.Service
             var key = Encoding.ASCII.GetBytes(jwtConfig.CurrentValue.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Sid, user.Id), new Claim(ClaimTypes.Role, user.Level.ToString()) }),
+                Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Sid, user.Id), new Claim(ClaimTypes.Role, user.Role.ToLevel().ToString()) }),
                 Expires = DateTime.Now.AddMinutes(30),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
                 Issuer = jwtConfig.CurrentValue.Issuer,

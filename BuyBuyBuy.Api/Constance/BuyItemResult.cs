@@ -8,6 +8,7 @@ namespace BuyBuyBuy.Api.Constance
 {
     public enum BuyItemResult
     {
+        [Description("抢购成功")]
         OK,
         [Description("您已经买过了")]
         Buyed,

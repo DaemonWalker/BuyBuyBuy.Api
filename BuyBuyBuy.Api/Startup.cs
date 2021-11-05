@@ -61,14 +61,16 @@ namespace BuyBuyBuy.Api
             services.AddScoped<ItemService>()
                 .AddScoped<ActivityService>()
                 .AddScoped<ICache, Cache>()
-                .AddSingleton<IActivityRepository, MySQLStore>()
+                .AddSingleton<IActivityRepository, MysqlStore>()
                 .AddSingleton<CurrentTimeAccessor>()
                 .AddScoped<OpenIdService>()
-                .AddScoped<IActivityBoughtRepository, RedisActivityBoughtRepository>()
-                .AddSingleton<IItemRepository, MySQLStore>()
+                .AddScoped<IActivityBoughtRepository, MySQLActivityBoughtRepository>()
+                .AddSingleton<IItemRepository, MysqlStore>()
                 .AddSingleton<IRequestCache, MemoryRequestCache>()
                 .AddScoped<BoughtService>()
-                .AddScoped<IActivityBoughtRepository, RedisActivityBoughtRepository>()
+                .AddScoped<IActivityBoughtRepository, MySQLActivityBoughtRepository>()
+                .AddScoped<IActivityItemRepository, MysqlStore>()
+                .AddScoped<IUserRepository, MysqlStore>()
                 .AddSingleton(fsql);
 
             services.AddHttpClient();

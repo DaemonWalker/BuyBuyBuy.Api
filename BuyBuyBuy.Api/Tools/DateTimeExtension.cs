@@ -24,5 +24,7 @@ namespace BuyBuyBuy.Api.Tools
             var sec = (int)(dt % 100);
             return new DateTime(year, month, day, hour, min, sec);
         }
+
+        public static string ToDisplayString(this DateTime dt) => dt.ToString("yyyy/MM/dd HH:mm:ss");
     }
 }

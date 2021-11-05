@@ -18,8 +18,5 @@ namespace BuyBuyBuy.Api.Entity
 
         [Column(Name = "end")]
         public DateTime End { get; set; }
-
-        [Navigate(ManyToMany = typeof(Item))]
-        public List<Item> Items { get; set; }
     }
 }

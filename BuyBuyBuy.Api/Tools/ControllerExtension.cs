@@ -22,7 +22,7 @@ namespace BuyBuyBuy.Api.Tools
             {
                 Name = name?.Value ?? String.Empty,
                 Id = userId,
-                Level = Convert.ToInt32(level?.Value ?? "1"),
+                Role = Convert.ToInt32(level?.Value ?? "1").ToRole(),
             };
         }
     }

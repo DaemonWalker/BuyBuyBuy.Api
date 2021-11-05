@@ -6,6 +6,9 @@ namespace BuyBuyBuy.Api.Contract.Data
 {
     public interface IActivityRepository
     {
-        ValueTask<Activity> GetActivityByIdAsync(int Id);
+        Task<Activity> GetActivityByIdAsync(int Id);
+        Task<Activity> GetLiveActivityAsync();
+        Task<Activity> GetNextHourActivityAsync();
+        Task<List<Activity>> GetAll();
     }
 }

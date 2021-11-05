@@ -26,10 +26,10 @@ namespace BuyBuyBuy.Api.Data
             return redis.HashDecrementAsync(BuildActivityInventoryKey(buy.ActivityId), buy.ItemId, buy.Quantity);
         }
 
-        public Task SetActivityInventory(List<Item> items)
+        public Task SetActivityInventory(List<ActivityItem> items)
         {
             var activityId = items.First().ActivityId;
-            var entries = items.Select(p => new HashEntry(p.Id, p.TotalInventory)).ToArray();
+            var entries = items.Select(p => new HashEntry(p.ItemId, p.Inventory)).ToArray();
             return redis.HashSetAsync(BuildActivityInventoryKey(activityId), entries);
         }
 

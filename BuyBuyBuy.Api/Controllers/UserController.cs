@@ -23,12 +23,5 @@ namespace BuyBuyBuy.Api.Controllers
             var bought = await boughtService.GetActivityUserBought(actId, userId);
             return Ok(bought);
         }
-
-        [HttpPost]
-        public async ValueTask<IActionResult> GetAllBought([FromBody] int actId)
-        {
-            var bought = await boughtService.GetActivityBought(actId);
-            return Ok(bought);
-        }
     }
 }

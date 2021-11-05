@@ -9,6 +9,6 @@ namespace BuyBuyBuy.Api.Contract.Data
     {
         Task<long> AddUserBuyAsync(BuyItemModel buy);
         Task<long> BuyItemAsync(BuyItemModel buy);
-        Task SetActivityInventory(List<Item> items);
+        Task SetActivityInventory(List<ActivityItem> items);
     }
 }
