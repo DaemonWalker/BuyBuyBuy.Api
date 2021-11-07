@@ -33,6 +33,11 @@ namespace BuyBuyBuy.Api.Data
             return fsql.Select<Activity>().ToListAsync();
         }
 
+        public Task<List<User>> GetAllUser()
+        {
+            return fsql.Select<User>().ToListAsync();
+        }
+
         public Task<User> GetByIdAsync(string id)
         {
             return fsql.Select<User>().Where(p => p.Id == id).ToOneAsync();

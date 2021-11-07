@@ -23,5 +23,6 @@ namespace BuyBuyBuy.Api.Controllers
             var bought = await boughtService.GetActivityUserBought(actId, userId);
             return Ok(bought);
         }
+
     }
 }

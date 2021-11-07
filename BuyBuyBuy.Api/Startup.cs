@@ -63,7 +63,7 @@ namespace BuyBuyBuy.Api
                 .AddScoped<ICache, Cache>()
                 .AddSingleton<IActivityRepository, MysqlStore>()
                 .AddSingleton<CurrentTimeAccessor>()
-                .AddScoped<OpenIdService>()
+                .AddScoped<UserService>()
                 .AddScoped<IActivityBoughtRepository, MySQLActivityBoughtRepository>()
                 .AddSingleton<IItemRepository, MysqlStore>()
                 .AddSingleton<IRequestCache, MemoryRequestCache>()

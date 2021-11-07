@@ -13,12 +13,14 @@ namespace BuyBuyBuy.Api.Service
         private readonly IActivityBoughtRepository activityHistoryRepo;
         private readonly IActivityRepository activityRepo;
         private readonly IActivityItemRepository activityItemRepository;
+        private readonly IUserRepository userRepository;
         public BoughtService(IActivityBoughtRepository activityHistory, IActivityRepository activity,
-            IActivityItemRepository activityItemRepository)
+            IActivityItemRepository activityItemRepository, IUserRepository userRepository)
         {
             this.activityHistoryRepo = activityHistory;
             this.activityRepo = activity;
             this.activityItemRepository = activityItemRepository;
+            this.userRepository = userRepository;
         }
         public async ValueTask<List<UserBoughtModel>> GetActivityBought(int actId)
         {
@@ -50,6 +52,7 @@ namespace BuyBuyBuy.Api.Service
                 item.Quantity = history.Quantity;
                 item.Activity = activity;
                 item.Time = history.BoughtTime.ToDisplayString();
+                item.User = await userRepository.GetByIdAsync(userId);
                 result.Add(item);
             }
 

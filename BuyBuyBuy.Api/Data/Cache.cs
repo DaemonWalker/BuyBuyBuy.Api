@@ -18,7 +18,7 @@ namespace BuyBuyBuy.Api.Data
 
         public Task<long> AddUserBuyAsync(BuyItemModel buy)
         {
-            return redis.HashIncrementAsync(BuildUserBoughtKey(buy), buy.UserId, buy.Quantity);
+            return redis.HashIncrementAsync(BuildUserBoughtKey(buy), buy.ItemId, buy.Quantity);
         }
 
         public Task<long> BuyItemAsync(BuyItemModel buy)

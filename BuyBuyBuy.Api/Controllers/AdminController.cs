@@ -15,11 +15,13 @@ namespace BuyBuyBuy.Api.Controllers
         private readonly IFreeSql fsql;
         private readonly ActivityService activityService;
         private readonly BoughtService boughtService;
-        public AdminController(IFreeSql fsql, ActivityService activityService, BoughtService boughtService)
+        private readonly UserService userService;
+        public AdminController(IFreeSql fsql, ActivityService activityService, BoughtService boughtService, UserService userService)
         {
             this.fsql = fsql;
             this.activityService = activityService;
             this.boughtService = boughtService;
+            this.userService = userService;
         }
 
         [HttpPost]
@@ -55,6 +57,13 @@ namespace BuyBuyBuy.Api.Controllers
         {
             var bought = await boughtService.GetActivityBought(actId);
             return Ok(bought);
+        }
+
+        [HttpGet]
+        public async ValueTask<IActionResult> GetAllUser()
+        {
+            var opts = await userService.GetUserOption();
+            return Ok(opts);
         }
     }
 }

@@ -13,8 +13,8 @@ namespace BuyBuyBuy.Api.Controllers
     [Route("api/[controller]/[action]")]
     public class Oauth2Controller : ControllerBase
     {
-        private readonly OpenIdService openIdService;
-        public Oauth2Controller(OpenIdService openIdService)
+        private readonly UserService openIdService;
+        public Oauth2Controller(UserService openIdService)
         {
             this.openIdService = openIdService;
         }

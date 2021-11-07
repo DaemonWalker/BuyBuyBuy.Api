@@ -10,5 +10,6 @@ namespace BuyBuyBuy.Api.Contract.Data
     {
         Task<User> GetByIdAsync(string id);
         Task<User> CreateOrUpdateUser(User user);
+        Task<List<User>> GetAllUser();
     }
 }

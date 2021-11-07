@@ -16,14 +16,14 @@ using System.Threading.Tasks;
 
 namespace BuyBuyBuy.Api.Service
 {
-    public class OpenIdService
+    public class UserService
     {
         private readonly HttpClient httpClient;
         private readonly IDiscoveryCache discovery;
         private readonly IOptionsMonitor<OpenIdConfig> config;
         private readonly IOptionsMonitor<JwtConfig> jwtConfig;
         private readonly IUserRepository userRepository;
-        public OpenIdService(IHttpClientFactory httpClientFactory, IDiscoveryCache discovery, IUserRepository userRepository,
+        public UserService(IHttpClientFactory httpClientFactory, IDiscoveryCache discovery, IUserRepository userRepository,
             IOptionsMonitor<OpenIdConfig> config, IOptionsMonitor<JwtConfig> jwtConfig)
         {
             this.httpClient = httpClientFactory.CreateClient("OpenId");
@@ -91,6 +91,17 @@ namespace BuyBuyBuy.Api.Service
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+        public async ValueTask<List<OptionModel>> GetUserOption()
+        {
+            var users = await userRepository.GetAllUser();
+            return users.Select(p => new OptionModel()
+            {
+                Label = $"{p.Id} - {p.Name}",
+                Key = p.Id,
+                Value = p.Id,
+                Display = p.Name,
+            }).ToList();
         }
     }
 }
